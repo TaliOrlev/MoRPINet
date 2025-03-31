@@ -44,17 +44,17 @@ class AHRS:
             ahrs_internal_states = fusion.internal_states
             internal_states[index] = np.array([ahrs_internal_states.acceleration_error,
                                                ahrs_internal_states.accelerometer_ignored,
-                                               ahrs_internal_states.acceleration_rejection_timer,
+                                               ahrs_internal_states.acceleration_recovery_trigger,
                                                ahrs_internal_states.magnetic_error,
-                                               ahrs_internal_states.magnetic_rejection_timer,
+                                               ahrs_internal_states.magnetic_recovery_trigger,
                                                ahrs_internal_states.magnetometer_ignored])
-
+            
             ahrs_flags = fusion.flags
             flags[index] = np.array([ahrs_flags.initialising,
-                                     ahrs_flags.acceleration_rejection_timeout,
-                                     ahrs_flags.acceleration_rejection_warning,
-                                     ahrs_flags.magnetic_rejection_timeout,
-                                     ahrs_flags.magnetic_rejection_warning])
+                                     ahrs_flags.acceleration_recovery,
+                                     0,
+                                     ahrs_flags.magnetic_recovery,
+                                     0])
 
         fusion_euler[fusion_euler > np.pi] = fusion_euler[fusion_euler > np.pi] - 2*np.pi
         last_idx_init = np.argwhere(flags[:, 0] == 1)[-1].item()
