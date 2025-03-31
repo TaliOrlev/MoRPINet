@@ -77,7 +77,8 @@ class Trainer:
                                     torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                     
                     # Combine losses - you may want to weight them
-                    loss = nll_loss.mean()
+                    combined_loss = nll_loss.mean() + 0.7 * loss
+                    loss = combined_loss
                 
                 train_loss.append(loss.item())
                 self.model.optimizer.zero_grad()
