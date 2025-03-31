@@ -185,6 +185,7 @@ class Tester:
 
                 output = self.get_values_from_network(imu=imu, task=task)
 
+            print(np.exp(output[:, 2]))
             # dead-reckoning for each step
             pos, pos_ref, psi = self.get_network_trajectory(nn_output=output, task=task)
 

@@ -57,27 +57,33 @@ class Trainer:
                 
                 # Handle both cases - whether model returns tuple or single tensor
                 if hasattr(outputs, '__len__') and not isinstance(outputs, torch.Tensor):
-                    mean_prediction, covariance = outputs
+                    mean_prediction, log_var = outputs
                 else:
                     # If model only returns mean prediction, use it directly
                     mean_prediction = outputs
-                    covariance = None
+                    log_var = None
                 
                 # Calculate standard loss on the mean prediction
                 loss = self.model.loss(mean_prediction, target)
                 
-                # Add covariance loss if available
-                if covariance is not None:
+                # Add log_var loss if available
+                if log_var is not None:
                     # Ensure covariance is positive
-                    covariance = torch.exp(covariance)
+                    covariance = torch.exp(log_var)
                     
                     # Calculate negative log likelihood term
                     nll_loss = 0.5 * (torch.log(covariance) + 
                                     (mean_prediction - target)**2 / covariance + 
                                     torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                     
-                    # Combine losses - you may want to weight them
-                    combined_loss = nll_loss.mean() + 0.7 * loss
+                    #print(f'NLL loss: {nll_loss.mean()}')
+                    lambda_reg = 0.1
+                    log_var_reg = lambda_reg * torch.mean(log_var**2)
+
+                    nll_loss_with_reg = nll_loss.mean() + log_var_reg
+                    #print(f'NLL loss with reg: {nll_loss_with_reg}')
+                    
+                    combined_loss = nll_loss_with_reg + 0.7 * loss
                     loss = combined_loss
                 
                 train_loss.append(loss.item())
@@ -104,22 +110,37 @@ class Trainer:
                         target = torch.unsqueeze(target, 1)
                     
                     outputs = self.model.model(imu)
+                
+                    # Handle both cases - whether model returns tuple or single tensor
                     if hasattr(outputs, '__len__') and not isinstance(outputs, torch.Tensor):
-                        mean_output, covariance_output = outputs
+                        mean_prediction, log_var = outputs
                     else:
-                        mean_output = outputs
-                        covariance_output = None
+                        # If model only returns mean prediction, use it directly
+                        mean_prediction = outputs
+                        log_var = None
                     
-                    # Standard loss
-                    loss = self.model.loss(mean_output, target)
+                    # Calculate standard loss on the mean prediction
+                    loss = self.model.loss(mean_prediction, target)
                     
-                    # Add covariance loss if available
-                    if covariance_output is not None:
-                        covariance_output = torch.exp(covariance_output)
-                        nll_loss = 0.5 * (torch.log(covariance_output) + 
-                                        (mean_output - target)**2 / covariance_output + 
+                    # Add log_var loss if available
+                    if log_var is not None:
+                        # Ensure covariance is positive
+                        covariance = torch.exp(log_var)
+                        
+                        # Calculate negative log likelihood term
+                        nll_loss = 0.5 * (torch.log(covariance) + 
+                                        (mean_prediction - target)**2 / covariance + 
                                         torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
-                        loss = nll_loss.mean()
+                        
+                        #print(f'NLL loss: {nll_loss.mean()}')
+                        lambda_reg = 0.1
+                        log_var_reg = lambda_reg * torch.mean(log_var**2)
+
+                        nll_loss_with_reg = nll_loss.mean() + log_var_reg
+                        #print(f'NLL loss with reg: {nll_loss_with_reg}')
+                        
+                        combined_loss = nll_loss_with_reg + 0.7 * loss
+                        loss = combined_loss
                     
                     val_loss.append(loss.item())
                 

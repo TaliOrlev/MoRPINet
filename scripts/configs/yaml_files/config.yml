@@ -1,6 +1,6 @@
 
 # running options
-train: off
+train: on
 test: on
 MoRPI: on
 INS:  off
