@@ -36,7 +36,7 @@ madgwick_avg_angle: on
 net_mode: 'MoRPINet'
 
 # weights file path to load
-dnet_weights_file: 'best_results/Dnet_weights.pth'
+dnet_weights_file: 'Dnet_weights_2025_3_31_15.44.16.pth'
 
 # MoRPI configs
 morpi_turn_threshold: 45  # degrees

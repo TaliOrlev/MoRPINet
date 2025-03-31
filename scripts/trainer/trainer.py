@@ -34,12 +34,10 @@ class Trainer:
             os.mkdir(weights_dir_path / self.config.net_mode)
 
     def train_loop(self, model_name: str):
-
         train_loss_list, validation_loss_list = [], []
-
+        
         for epoch in range(self.config[model_name].epochs):
             train_loss = []
-
             # Train loop
             self.model.model.train()
             for i, data in enumerate(self.train_loader):
@@ -49,28 +47,52 @@ class Trainer:
                     target = torch.unsqueeze(target, 1)
                 except IndexError:
                     target = torch.unsqueeze(target, 1)
+                
                 imu = imu.to(self.config.device, dtype=torch.float)
                 target = target.to(self.config.device, dtype=torch.float)
-
-                prediction = self.model.model(imu)
-                loss = self.model.loss(prediction, target)
-
+                
+                # Check if model returns multiple outputs
+                # Adding debugging print for clarity
+                outputs = self.model.model(imu)
+                
+                # Handle both cases - whether model returns tuple or single tensor
+                if hasattr(outputs, '__len__') and not isinstance(outputs, torch.Tensor):
+                    mean_prediction, covariance = outputs
+                else:
+                    # If model only returns mean prediction, use it directly
+                    mean_prediction = outputs
+                    covariance = None
+                
+                # Calculate standard loss on the mean prediction
+                loss = self.model.loss(mean_prediction, target)
+                
+                # Add covariance loss if available
+                if covariance is not None:
+                    # Ensure covariance is positive
+                    covariance = torch.exp(covariance)
+                    
+                    # Calculate negative log likelihood term
+                    nll_loss = 0.5 * (torch.log(covariance) + 
+                                    (mean_prediction - target)**2 / covariance + 
+                                    torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
+                    
+                    # Combine losses - you may want to weight them
+                    loss = nll_loss.mean()
+                
                 train_loss.append(loss.item())
-
                 self.model.optimizer.zero_grad()
                 loss.backward()
                 self.model.optimizer.step()
-
+            
             if self.config[model_name].scheduler is not None:
                 self.model.scheduler.step(np.mean(np.array(train_loss)))
-
+            
             train_loss_list.append(np.mean(np.array(train_loss)))
-
-            # Validation loop
+            
+            # Validation loop (similar modifications)
             self.model.model.eval()
             with torch.no_grad():
                 val_loss = []
-
                 for data in self.validation_loader:
                     imu, target = data
                     imu = imu.to(self.config.device, dtype=torch.float)
@@ -79,19 +101,34 @@ class Trainer:
                         target = target[:, 0]
                     except IndexError:
                         target = torch.unsqueeze(target, 1)
-
-                    output = self.model.model(imu)
-                    loss = self.model.loss(output, target)
-
+                    
+                    outputs = self.model.model(imu)
+                    if hasattr(outputs, '__len__') and not isinstance(outputs, torch.Tensor):
+                        mean_output, covariance_output = outputs
+                    else:
+                        mean_output = outputs
+                        covariance_output = None
+                    
+                    # Standard loss
+                    loss = self.model.loss(mean_output, target)
+                    
+                    # Add covariance loss if available
+                    if covariance_output is not None:
+                        covariance_output = torch.exp(covariance_output)
+                        nll_loss = 0.5 * (torch.log(covariance_output) + 
+                                        (mean_output - target)**2 / covariance_output + 
+                                        torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
+                        loss = nll_loss.mean()
+                    
                     val_loss.append(loss.item())
-
-            validation_loss_list.append(np.mean(np.array(val_loss)))
-
+                
+                validation_loss_list.append(np.mean(np.array(val_loss)))
+            
             # print progress
             if (epoch + 1) % 5 == 0:
                 print(f'epoch: [{epoch + 1}/{self.config[model_name].epochs}], '
-                      f'train_loss: {np.mean(train_loss):.4f} val_loss: {np.mean(val_loss):.4f}')
-
+                    f'train_loss: {np.mean(train_loss):.4f} val_loss: {np.mean(val_loss):.4f}')
+        
         return train_loss_list, validation_loss_list
 
     def train(self):

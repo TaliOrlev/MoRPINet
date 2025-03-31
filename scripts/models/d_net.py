@@ -37,4 +37,7 @@ class DnetModel(nn.Module):
 
         x = self.relu(self.ln2(self.dp2(self.fc2(x))))
         x = self.fc3(x)
-        return x
+        mean = x[:, 0].unsqueeze(1)  # First column is mean
+        log_var = x[:, 1].unsqueeze(1)  # Second column is log_variance
+        
+        return mean, log_var

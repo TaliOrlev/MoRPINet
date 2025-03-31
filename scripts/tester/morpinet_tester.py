@@ -29,23 +29,31 @@ class MoRPINetTester(Tester):
                          result_file)
 
     def get_values_from_network(self, imu: np.ndarray, task: tuple):
-        # get distance values
         if self.config.net_mode is not None:
-            pred_dists = torch.squeeze(self.model.model(imu)).cpu().numpy()
+            mean, log_var = self.model.model(imu)
+            pred_dists = mean.squeeze().cpu().numpy()       # shape: (N,)
+            pred_logvar = log_var.squeeze().cpu().numpy()    # shape: (N,)
             self.all_pred_dnet.append(pred_dists)
             self.all_gt_dnet.append(self.dataset_gt[task[0]][:, 0])
-        else:  # GT
+        else:
             pred_dists = self.dataset_gt[task[0]][:, 0]
+            pred_logvar = np.zeros_like(pred_dists)
 
-        # get angles values
-        if self.config.net_mode is not None:  # AHRS
+        if self.config.net_mode is not None:
             pred_ang = self.get_ahrs_ang(task=task)[1:].T
-        else:  # GT
+        else:
             pred_ang = self.dataset_gt[task[0]][:, 1]
 
-        output = np.hstack([pred_dists.reshape(-1, 1), pred_ang.reshape(-1, 1)])
+        # Stack into (N, 3): dist, angle, log_variance
+        output = np.stack([
+            pred_dists,
+            pred_ang.astype(float),
+            pred_logvar
+        ], axis=1)
 
         return output
+
+
 
     def get_network_statistic(self,
                               reconstruct_pos: np.ndarray,

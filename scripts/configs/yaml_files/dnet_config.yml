@@ -23,4 +23,4 @@ scheduler:
 model:
   type: DnetModel
   args:
-    output_features: 1
+    output_features: 2
