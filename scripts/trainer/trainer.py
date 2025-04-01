@@ -79,7 +79,7 @@ class Trainer:
                                     torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                     
                     #print(f'NLL loss: {nll_loss.mean()}')
-                    lambda_reg = 0.2
+                    lambda_reg = 0.05
                     log_var_reg = lambda_reg * torch.mean(log_var**2)
 
                     nll_loss_with_reg = nll_loss.mean() + log_var_reg
@@ -136,7 +136,7 @@ class Trainer:
                                         torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                         
                         #print(f'NLL loss: {nll_loss.mean()}')
-                        lambda_reg = 0.2
+                        lambda_reg = 0.05
                         log_var_reg = lambda_reg * torch.mean(log_var**2)
 
                         nll_loss_with_reg = nll_loss.mean() + log_var_reg
