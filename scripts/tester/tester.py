@@ -299,6 +299,8 @@ class Tester:
             steps_error_percents = get_error_in_percents(all_gt_dnet_concat, self.net_eval_metrics['Dnet'])
             self.net_eval_metrics['Dnet percents'] = steps_error_percents
 
+            print(self.net_eval_metrics['Dnet'])
+
     def add_avg_to_dict(self):
         self.results_dict['avg'] = {'mean error': {'meters': {}}, self.config.net_mode: {}}
         self.results_straight_dict['avg'] = {'mean error': {'meters': {}}, self.config.net_mode: {}}
