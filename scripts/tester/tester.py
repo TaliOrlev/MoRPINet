@@ -185,7 +185,11 @@ class Tester:
 
                 output = self.get_values_from_network(imu=imu, task=task)
 
-            print(np.exp(output[:, 2]))
+            std_pred = np.sqrt(np.exp(output[:, 2]))
+            print("Mean predicted std:", np.mean(std_pred))
+            print("Min predicted std:", np.min(std_pred))
+            print("Max predicted std:", np.max(std_pred))
+
             # dead-reckoning for each step
             pos, pos_ref, psi = self.get_network_trajectory(nn_output=output, task=task)
 

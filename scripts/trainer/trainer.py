@@ -69,6 +69,7 @@ class Trainer:
                 # Add log_var loss if available
                 if log_var is not None:
                     # Ensure covariance is positive
+                    print("log_var std across batch:", log_var.std().item())
                     covariance = torch.exp(log_var)
                     
                     # Calculate negative log likelihood term
@@ -77,8 +78,8 @@ class Trainer:
                                     torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                     
                     #print(f'NLL loss: {nll_loss.mean()}')
-                    lambda_reg = 0.1
-                    log_var_reg = lambda_reg * torch.mean(log_var**2)
+                    lambda_reg = 0.07
+                    log_var_reg = lambda_reg * torch.std(log_var)
 
                     nll_loss_with_reg = nll_loss.mean() + log_var_reg
                     #print(f'NLL loss with reg: {nll_loss_with_reg}')
@@ -133,8 +134,8 @@ class Trainer:
                                         torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                         
                         #print(f'NLL loss: {nll_loss.mean()}')
-                        lambda_reg = 0.1
-                        log_var_reg = lambda_reg * torch.mean(log_var**2)
+                        lambda_reg = 0.07
+                        log_var_reg = lambda_reg * torch.std(log_var)
 
                         nll_loss_with_reg = nll_loss.mean() + log_var_reg
                         #print(f'NLL loss with reg: {nll_loss_with_reg}')
