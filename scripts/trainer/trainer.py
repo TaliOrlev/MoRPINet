@@ -69,6 +69,7 @@ class Trainer:
                 # Add log_var loss if available
                 if log_var is not None:
                     # Ensure covariance is positive
+                    print("log_var std across batch:", log_var.std().item())
                     log_var = torch.clamp(log_var, min=-1.0, max=1.0)
                     covariance = torch.exp(log_var)
                     
