@@ -14,6 +14,8 @@ class Graphs:
         self.recon_traj = None
         self.gt_traj = None
 
+        self.recon_std = None
+
         self.show_plot_train_loss: bool = True
         self.show_plot_rtk_trajectories: bool = self.config.plot_missions
         self.show_plot_reconstruct_trajectory: bool = self.config.plot_reconstruct_missions
@@ -67,7 +69,6 @@ class Graphs:
                 plt.legend()
 
     def plot_reconstruct_trajectory(self, net_mode: Union[str, list]):
-
         if self.show_plot_reconstruct_trajectory:
 
             if net_mode == 'all':
@@ -87,7 +88,23 @@ class Graphs:
                 plt.plot(self.gt_traj[m][:, 1], self.gt_traj[m][:, 0], 'k', label=f'GT for {num_mission[n]}')
                 plt.plot(self.gt_traj[m][[0, -1], 1], self.gt_traj[m][[0, -1], 0], 'ok')
                 for model in mode_list:
-                    plt.plot(self.recon_traj[model][m][:, 1], self.recon_traj[model][m][:, 0], label=f'{model} for {num_mission[n]}')
+                    if model == "MoRPINet":
+                        x = self.recon_traj[model][m][:, 1]  # East
+                        y = self.recon_traj[model][m][:, 0]  # North
+                        std = self.recon_std[model][m]
+
+                        diff = len(x) - len(std)
+                        if diff > 0:
+                            std = np.insert(std, 0, [0.0] * diff)
+                        plt.plot(x, y, label=f'{model} for {num_mission[n]}')
+
+                        # Add uncertainty sleeve (±1 std) in East direction
+                        plt.fill_betweenx(y, x - std, x + std, alpha=0.5, label=f'{model} cov (East)')
+                        
+
+                    else:
+                        plt.plot(self.recon_traj[model][m][:, 1], self.recon_traj[model][m][:, 0], label=f'{model} for {num_mission[n]}')
+
                 plt.xlabel('East [m]')
                 plt.ylabel('North [m]')
                 plt.axis('equal')

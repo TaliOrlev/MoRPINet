@@ -70,7 +70,7 @@ class Trainer:
                 if log_var is not None:
                     # Ensure covariance is positive
                     print("log_var std across batch:", log_var.std().item())
-                    log_var = torch.clamp(log_var, min=-1.0, max=1.0)
+                    log_var = torch.clamp(log_var, min=-2.0, max=2.0)
                     covariance = torch.exp(log_var)
                     
                     # Calculate negative log likelihood term
@@ -79,13 +79,13 @@ class Trainer:
                                     torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                     
                     #print(f'NLL loss: {nll_loss.mean()}')
-                    lambda_reg = 0.05
+                    lambda_reg = 0.02
                     log_var_reg = lambda_reg * torch.mean(log_var**2)
 
                     nll_loss_with_reg = nll_loss.mean() + log_var_reg
                     #print(f'NLL loss with reg: {nll_loss_with_reg}')
                     
-                    combined_loss = nll_loss_with_reg + 0.1 * loss
+                    combined_loss = nll_loss_with_reg + 0.7 * loss
                     loss = combined_loss
                 
                 train_loss.append(loss.item())
@@ -127,7 +127,7 @@ class Trainer:
                     # Add log_var loss if available
                     if log_var is not None:
                         # Ensure covariance is positive
-                        log_var = torch.clamp(log_var, min=-1.0, max=1.0)
+                        log_var = torch.clamp(log_var, min=-2.0, max=2.0)
                         covariance = torch.exp(log_var)
                         
                         # Calculate negative log likelihood term
@@ -136,13 +136,13 @@ class Trainer:
                                         torch.log(torch.tensor(2 * np.pi, device=self.config.device)))
                         
                         #print(f'NLL loss: {nll_loss.mean()}')
-                        lambda_reg = 0.05
+                        lambda_reg = 0.02
                         log_var_reg = lambda_reg * torch.mean(log_var**2)
 
                         nll_loss_with_reg = nll_loss.mean() + log_var_reg
                         #print(f'NLL loss with reg: {nll_loss_with_reg}')
                         
-                        combined_loss = nll_loss_with_reg + 0.1 * loss
+                        combined_loss = nll_loss_with_reg + 0.7 * loss
                         loss = combined_loss
                     
                     val_loss.append(loss.item())

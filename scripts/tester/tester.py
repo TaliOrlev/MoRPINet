@@ -46,6 +46,7 @@ class Tester:
         self.morpi_gt = {'MoRPI-A': {}, 'MoRPI-G': {}}
         self.ins_gt = {'INS-3D': {}, 'INS-2D': {}}
         self.traj_recon = {}
+        self.recon_std = {}
 
         self.all_pred_dnet = []
         self.all_gt_dnet = []
@@ -179,13 +180,14 @@ class Tester:
 
             if self.config.net_mode not in self.traj_recon.keys():
                 self.traj_recon[self.config.net_mode] = {}
+                self.recon_std[self.config.net_mode] = {}
 
             with torch.no_grad():
                 imu = torch.tensor(self.imu[task[0]].astype(float)).to(self.config.device, dtype=torch.float)
 
                 output = self.get_values_from_network(imu=imu, task=task)
 
-            print(np.exp(output[:, 2]))
+            self.recon_std[self.config.net_mode][task[1]] = np.exp(output[:, 2])
             # dead-reckoning for each step
             pos, pos_ref, psi = self.get_network_trajectory(nn_output=output, task=task)
 
@@ -299,8 +301,6 @@ class Tester:
             steps_error_percents = get_error_in_percents(all_gt_dnet_concat, self.net_eval_metrics['Dnet'])
             self.net_eval_metrics['Dnet percents'] = steps_error_percents
 
-            print(self.net_eval_metrics['Dnet'])
-
     def add_avg_to_dict(self):
         self.results_dict['avg'] = {'mean error': {'meters': {}}, self.config.net_mode: {}}
         self.results_straight_dict['avg'] = {'mean error': {'meters': {}}, self.config.net_mode: {}}
@@ -351,6 +351,7 @@ class Tester:
     def update_graphs(self):
         self.graphs.recon_traj = self.traj_recon
         self.graphs.gt_traj = self.nn_gt
+        self.graphs.recon_std = self.recon_std
 
     def update_results_file(self):
         self.result_file.recon_eval_metrics = self.recon_eval_metrics

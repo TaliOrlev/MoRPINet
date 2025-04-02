@@ -1,6 +1,6 @@
 
 # running options
-train: on
+train: off
 test: on
 MoRPI: on
 INS:  off
@@ -36,7 +36,7 @@ madgwick_avg_angle: on
 net_mode: 'MoRPINet'
 
 # weights file path to load
-dnet_weights_file: 'Dnet_weights_2025_4_1_12.2.54.pth'
+dnet_weights_file: 'Dnet_weights_2025_4_2_9.54.59.pth'
 
 # MoRPI configs
 morpi_turn_threshold: 45  # degrees
