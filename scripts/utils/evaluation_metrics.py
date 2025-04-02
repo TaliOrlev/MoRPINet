@@ -35,6 +35,15 @@ def get_metrics(true: np.ndarray, predict: np.ndarray) -> dict:
     else:
         return run_metrics(true, predict)
 
+def get_stds(stds: dict) -> dict:
+    summary = {}
+    for model, missions in stds.items():
+        for path_name, cov_array in missions.items():
+            summary[path_name] = {
+                'mean': round(float(np.mean(cov_array)), 4),
+                'std': round(float(np.std(cov_array)), 4)
+            }
+    return summary
 
 def get_error_in_percents(true: np.ndarray, error: dict) -> dict:
     percent_dict = {}

@@ -21,6 +21,7 @@ class ResultFile:
         self.res_dict: Optional[dict] = None
         self.recon_eval_metrics: Optional[dict] = None
         self.net_eval_metrics: Optional[dict] = None
+        self.net_std_metrices: Optional[dict] = None
         self.res_avg_dict: Optional[dict] = None
         self.res_straight_dict: Optional[dict] = None
         self.res_straight_avg_dict: Optional[dict] = None
@@ -77,6 +78,11 @@ class ResultFile:
         self.res_file.write(f'networks evaluation metrics:\n')
         self.res_file.write(f'(How well do the networks could predict the targets)')
         self.res_file.write(f'\n{net_df.to_markdown(tablefmt="psql")}\n')
+
+        net_std = pd.DataFrame(self.net_std_metrices)
+        self.res_file.write(f'Covariance:\n')
+        self.res_file.write(f'(Mean and std of the covariances that dnet predicted)')
+        self.res_file.write(f'\n{net_std.to_markdown(tablefmt="psql")}\n')
 
     @staticmethod
     def create_table(res_dict, error: str, units: str):

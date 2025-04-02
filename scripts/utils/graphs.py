@@ -14,7 +14,7 @@ class Graphs:
         self.recon_traj = None
         self.gt_traj = None
 
-        self.recon_std = None
+        self.dnet_std = None
 
         self.show_plot_train_loss: bool = True
         self.show_plot_rtk_trajectories: bool = self.config.plot_missions
@@ -91,7 +91,7 @@ class Graphs:
                     if model == "MoRPINet":
                         x = self.recon_traj[model][m][:, 1]  # East
                         y = self.recon_traj[model][m][:, 0]  # North
-                        std = self.recon_std[model][m]
+                        std = self.dnet_std[model][m]
 
                         diff = len(x) - len(std)
                         if diff > 0:
