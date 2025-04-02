@@ -1,0 +1,132 @@
+****Results:****
+
+mean error - meters
+
++----------+---------+---------+---------+---------+---------+---------+---------+----------+---------+----------+---------+---------+---------+---------+----------+---------+---------+---------+---------+---------+---------+
+|          |     d_5 |     d_2 |     d_3 |     d_4 |     d_1 |     e_2 |     e_5 |      e_1 |     e_3 |      e_4 |     f_2 |     f_5 |     f_1 |     f_3 |      f_4 |     g_3 |     g_4 |     g_1 |     g_2 |     g_5 |     avg |
+|----------+---------+---------+---------+---------+---------+---------+---------+----------+---------+----------+---------+---------+---------+---------+----------+---------+---------+---------+---------+---------+---------|
+| MoRPINet | 3.53153 | 0.5673  | 1.68811 | 2.91841 | 1.59836 | 2.78567 | 1.31357 | 1.35799  | 1.22442 | 0.848808 | 4.21332 | 1.03694 | 2.6057  | 2.2544  | 0.683317 | 1.83004 | 1.46294 | 1.63214 | 3.25505 | 1.58793 | 1.9198  |
+| MoRPI-A  | 2.44064 | 5.2317  | 3.22512 | 8.36227 | 1.80542 | 2.06701 | 2.49485 | 0.953826 | 1.48086 | 2.21781  | 2.68043 | 4.84853 | 3.95289 | 2.89015 | 3.27151  | 2.79261 | 1.44503 | 1.56185 | 1.56787 | 1.80877 | 2.85496 |
+| MoRPI-G  | 3.27088 | 3.15249 | 3.26933 | 2.97675 | 3.11828 | 8.15415 | 8.13539 | 8.23428  | 9.14716 | 8.97926  | 6.5034  | 6.07291 | 6.47179 | 6.27874 | 6.87244  | 7.14322 | 7.42926 | 6.75248 | 6.61619 | 7.09022 | 6.28343 |
++----------+---------+---------+---------+---------+---------+---------+---------+----------+---------+----------+---------+---------+---------+---------+----------+---------+---------+---------+---------+---------+---------+
+
+mean error - mean values for each trajectory
+
++-----+------------+-----------+-----------+
+|     |   MoRPINet |   MoRPI-A |   MoRPI-G |
+|-----+------------+-----------+-----------|
+| d   |    2.06074 |   4.21303 |   3.15755 |
+| e   |    1.50609 |   1.84287 |   8.53005 |
+| f   |    2.15873 |   3.5287  |   6.43986 |
+| g   |    1.95362 |   1.83523 |   7.00627 |
+| avg |    1.9198  |   2.85496 |   6.28343 |
++-----+------------+-----------+-----------+
+
+mean error - meters
+
++-------+
+| avg   |
+|-------|
++-------+
+
+mean error - mean values for each trajectory
+
+
+
+reconstructed trajectories evaluation metrics:
+(How well do the reconstructed trajectories close to the gt)
++------+------------+-----------+-----------+
+|      |   MoRPINet |   MoRPI-A |   MoRPI-G |
+|------+------------+-----------+-----------|
+| MSE  |    4.63503 |  10.9432  |  43.4129  |
+| RMSE |    1.9198  |   2.85496 |   6.28343 |
+| MAE  |    1.59126 |   2.4353  |   5.66223 |
++------+------------+-----------+-----------+
+
+Improvement:
++------+---------+
+|      |       0 |
+|------+---------|
+| MSE  | 57.6447 |
+| RMSE | 32.7557 |
+| MAE  | 34.6584 |
++------+---------+
+networks evaluation metrics:
+(How well do the networks could predict the targets)
++------+-------------+-----------------+
+|      |        Dnet |   Dnet percents |
+|------+-------------+-----------------|
+| MSE  | 0.000507549 |         97.3458 |
+| RMSE | 0.0225289   |         83.7084 |
+| MAE  | 0.0170492   |         87.3689 |
++------+-------------+-----------------+
+
+****Configs:****
+device: cuda
+train: False
+test: True
+MoRPI: True
+INS: False
+train_missions: ['a', 'h', 'j', 'k', 'l', 'm', 'n', 'o', 'r']
+test_missions: ['d', 'e', 'f', 'g']
+MoRPI_train_missions: ['a', 'j', 'k', 'n']
+INS_missions: ['b', 'c']
+plot_missions: False
+plot_reconstruct_missions: True
+window_size: 2
+overlap: 1
+overlap_test: False
+imu_freq: 120
+rtk_freq: 10
+g: 9.796
+do_calibration: False
+do_ins_calibration: True
+do_lpf: False
+gyro_in_degrees: True
+madgwick_avg_angle: True
+net_mode: MoRPINet
+dnet_weights_file: best_results/Dnet_weights.pth
+morpi_turn_threshold: 45
+imu_rtk_ratio: 12
+d_net:
+	epochs: 300
+	batch_size: 2048
+	loss: <class 'torch.nn.modules.loss.L1Loss'>
+optimizer:
+		type: <class 'torch.optim.adam.Adam'>
+		lr: 0.0025
+	optimizer: {'type': <class 'torch.optim.adam.Adam'>, 'lr': 0.0025}
+scheduler:
+		type: <class 'torch.optim.lr_scheduler.ReduceLROnPlateau'>
+args:
+			mode: min
+			patience: 20
+			factor: 0.5
+			min_lr: 1e-06
+			verbose: True
+		args: {'mode': 'min', 'patience': 20, 'factor': 0.5, 'min_lr': 1e-06, 'verbose': True}
+	scheduler: {'type': <class 'torch.optim.lr_scheduler.ReduceLROnPlateau'>, 'args': {'mode': 'min', 'patience': 20, 'factor': 0.5, 'min_lr': 1e-06, 'verbose': True}}
+model:
+		type: <class 'scripts.models.d_net.DnetModel'>
+args:
+			output_features: 1
+		args: {'output_features': 1}
+	model: {'type': <class 'scripts.models.d_net.DnetModel'>, 'args': {'output_features': 1}}
+d_net: <scripts.configs.train_config.TrainConfig object at 0x715322949750>
+data_to_file: <scripts.utils.utils.DataToFile object at 0x71543ada0d90>
+
+****Neural Networks:****
+
+D-Net architecture:
+DnetModel(
+  (conv1): Conv1d(6, 7, kernel_size=(2,), stride=(1,))
+  (relu): ReLU()
+  (dp_c): Dropout(p=0.1, inplace=False)
+  (fc1): Linear(in_features=305, out_features=512, bias=True)
+  (dp1): Dropout(p=0.5, inplace=False)
+  (ln1): LayerNorm((512,), eps=1e-05, elementwise_affine=True)
+  (fc2): Linear(in_features=512, out_features=32, bias=True)
+  (dp2): Dropout(p=0.5, inplace=False)
+  (ln2): LayerNorm((32,), eps=1e-05, elementwise_affine=True)
+  (fc3): Linear(in_features=32, out_features=1, bias=True)
+)
