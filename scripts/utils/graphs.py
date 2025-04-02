@@ -99,7 +99,7 @@ class Graphs:
                         plt.plot(x, y, label=f'{model} for {num_mission[n]}')
 
                         # Add uncertainty sleeve (±1 std) in East direction
-                        plt.fill_betweenx(y, x - std, x + std, alpha=0.5, label=f'{model} cov (East)')
+                        plt.fill_betweenx(y, x - std, x + std, alpha=0.5, label=f'{model} cov')
                         
 
                     else:
